@@ -1,7 +1,7 @@
 import React from 'react'
 import {  IoChatbox, IoLogoReact } from "react-icons/io5";
 import { SidebarMenuItem } from './SideBarMenuItem';
-import { CiChat1 } from 'react-icons/ci';
+
 
 const menuItems = [
     {
@@ -18,7 +18,7 @@ export const SideBar = () => {
     <div
     id="menu"
     style={{ width: "400px" }}
-    className="bg-gray-900 min-h-screen z-10 text-slate-300 w-64  left-0  "
+    className="bg-gray-900 min-h-screen z-10 text-slate-300 w-64  left-0 "
   >
     <div id="logo" className="my-4 px-6">
       <h1 className="flex items-center text-lg md:text-2xl font-bold text-white">
