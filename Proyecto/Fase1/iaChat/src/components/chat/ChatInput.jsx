@@ -1,20 +1,38 @@
 import React from "react";
+import { useChatbotContext } from "../../context/ChatboxContext";
 
 export const ChatInput = () => {
-  
+  const { sendMessage, setInputValue, inputValue } = useChatbotContext();
+
+  const handleSubmit = (e) => {
+    e.preventDefault(); // Evita que el formulario recargue la página
+    if (inputValue.trim()) {
+      sendMessage(inputValue); // Envía el mensaje usando el contexto
+      setInputValue(""); // Limpia el campo de entrada
+    }
+  };
+
   return (
-    <div className="flex flex-row items-center h-16 rounded-xl bg-white w-full px-4">
+    <form
+      onSubmit={handleSubmit} // Maneja el evento de envío
+      className="flex flex-row items-center h-16 rounded-xl bg-white w-full px-4"
+    >
       <div className="flex-grow ml-4">
         <div className="relative w-full">
           <input
             type="text"
             className="flex w-full border rounded-xl focus:outline-none focus:border-indigo-300 pl-4 h-10"
+            value={inputValue}
             placeholder="Type your message..."
+            onChange={(e) => setInputValue(e.target.value)} // Actualiza el estado del input
           />
         </div>
       </div>
       <div className="ml-4">
-        <button className="flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 rounded-xl text-white px-4 py-1 flex-shrink-0">
+        <button
+          type="submit" // Cambiado a "submit" para integrarse con el formulario
+          className="flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 rounded-xl text-white px-4 py-1 flex-shrink-0"
+        >
           <span>Send</span>
           <span className="ml-2">
             <svg
@@ -34,6 +52,6 @@ export const ChatInput = () => {
           </span>
         </button>
       </div>
-    </div>
+    </form>
   );
 };

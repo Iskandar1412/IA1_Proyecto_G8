@@ -1,24 +1,72 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { createAndTrainModel, generateCode } from '../model/modelChatbot';
+
 
 
 const ChatbotContext = createContext();
+const initialMessages = [
+
+  { id: 1, sender: "C", text: "Hola, son IaChatbot, en que puedo ayudarte?🤖", type: "received" },
+];
 
 
-export const ChatbotProvider = ({ trainingData, children }) => {
-  const [isTraining, setIsTraining] = useState(false);
 
-  useEffect(() => {
-    const trainModel = async () => {
-      setIsTraining(true);
-      await createAndTrainModel(trainingData);
-      setIsTraining(false);
+export const ChatbotProvider = ({  children }) => {
+
+  const [messages, setMessages] = useState(initialMessages);
+  const [inputValue, setInputValue] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [isTyping, setIsTyping] = useState(false);
+
+  const sendMessage = (text) => {
+    const newMessage = {
+      id: messages.length + 1,
+      sender: 'A',
+      text,
+      type: 'sent',
     };
-    trainModel();
-  }, [trainingData]);
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
+    setInputValue('');
+    setIsTyping(true);
+    setTimeout(() => {
+      setIsTyping(false);
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg.id === newMessage.id ? { ...msg, seen: true } : msg
+        )
+      );
 
-  return (
-    <ChatbotContext.Provider value={{ isTraining, generateCode }}>
+      handleReceivedMessage('Hola, son IaChatbot, en que puedo ayudarte?🤖');
+    }, 1000);
+  
+  }
+
+  const handleReceivedMessage = (text) => {
+    const newMessage = {
+      id: messages.length + 1,
+      sender: 'C',
+      text,
+      type: 'received',
+    };
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
+  }
+
+ return (
+    <ChatbotContext.Provider
+      value={{
+        messages,
+        setMessages,
+        inputValue,
+        setInputValue,
+        loading,
+        setLoading,
+        error,
+        setError,
+        isTyping,
+        setIsTyping,
+        sendMessage
+      }}
+    >
       {children}
     </ChatbotContext.Provider>
   );
