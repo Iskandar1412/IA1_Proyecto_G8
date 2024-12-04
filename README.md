@@ -9,7 +9,7 @@
 
 |     CARPETA     |   MD   | Fecha Entrega | Prorroga |
 | :-------------: | :----: | :-----------: | :------: |
-| [Proyecto 1 Fase 1](./) | [View](.) | 08/Diciembre |   ---   |
+| [Proyecto 1 Fase 1](./Proyecto/Fase1/iaChat/) | [View](.) | 08/Diciembre |   ---   |
 | [Proyecto 1 Fase 2](./) | [View](.) | --- |   ---   |
 | [Proyecto 1 Fase 3](./) | [View](.) | --- |   ---   |
 | [Proyecto 1 Fase 4](./) | [View](.) | --- |   ---   |
@@ -28,7 +28,7 @@
     <tbody>
         <tr>
             <td rowspan=4 align="center">Proyectos</td>
-            <td rowspan=1 align="center"><a href="./Enunciados/">Proyecto Fase 1</a></td>
+            <td rowspan=1 align="center"><a href="./Enunciados/[IA1]Fase1.pdf">Proyecto Fase 1</a></td>
             <td align="center">08/Dic</td>
             <td align="center">---</td>
         </tr>
