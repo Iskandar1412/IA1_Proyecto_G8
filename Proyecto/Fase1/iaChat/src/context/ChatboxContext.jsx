@@ -1,45 +1,52 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-
-
+import React, { createContext, useContext, useState } from 'react';
+import { useModelChatBot } from '../hooks/useModelChatBot';
 
 const ChatbotContext = createContext();
-const initialMessages = [
 
-  { id: 1, sender: "C", text: "Hola, son IaChatbot, en que puedo ayudarte?🤖", type: "received" },
+const initialMessages = [
+  {
+    id: 0,
+    sender: 'C',
+    text: 'Hola, soy IaChatbot, ¿en qué puedo ayudarte? 🤖',
+    type: 'received',
+  },
 ];
 
-
-
-export const ChatbotProvider = ({  children }) => {
+export const ChatbotProvider = ({ children }) => {
+  const {generarRespuesta, isLoading:isLoadingModel} = useModelChatBot();
 
   const [messages, setMessages] = useState(initialMessages);
   const [inputValue, setInputValue] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [isTyping, setIsTyping] = useState(false);
 
-  const sendMessage = (text) => {
+  const [error, setError] = useState(null);
+
+  const sendMessage = async (text) => {
     const newMessage = {
       id: messages.length + 1,
       sender: 'A',
       text,
       type: 'sent',
     };
+
     setMessages((prevMessages) => [...prevMessages, newMessage]);
     setInputValue('');
-    setIsTyping(true);
-    setTimeout(() => {
-      setIsTyping(false);
-      setMessages((prevMessages) =>
-        prevMessages.map((msg) =>
-          msg.id === newMessage.id ? { ...msg, seen: true } : msg
-        )
-      );
 
-      handleReceivedMessage('Hola, son IaChatbot, en que puedo ayudarte?🤖');
-    }, 1000);
-  
-  }
+
+    try {
+      handleReceivedMessage('Escribiendo...');
+      const chatbotResponse = await generarRespuesta(text);
+      // eliminar el mensaje de "escribiendo..."
+      setMessages((prevMessages) => prevMessages.slice(0, -1));
+      handleReceivedMessage(chatbotResponse);
+    } catch (err) {
+      console.error('Error al manejar la entrada del chatbot:', err);
+      setError('Hubo un problema al procesar tu mensaje.');
+    } finally {
+
+
+
+    }
+  };
 
   const handleReceivedMessage = (text) => {
     const newMessage = {
@@ -49,29 +56,23 @@ export const ChatbotProvider = ({  children }) => {
       type: 'received',
     };
     setMessages((prevMessages) => [...prevMessages, newMessage]);
-  }
+  };
 
- return (
+  return (
     <ChatbotContext.Provider
       value={{
         messages,
-        setMessages,
         inputValue,
         setInputValue,
-        loading,
-        setLoading,
+        sendMessage,
         error,
-        setError,
-        isTyping,
-        setIsTyping,
-        sendMessage
+        isLoadingModel
       }}
     >
       {children}
     </ChatbotContext.Provider>
   );
 };
-
 
 export const useChatbotContext = () => {
   const context = useContext(ChatbotContext);

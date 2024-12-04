@@ -3,7 +3,7 @@ import { useChatbotContext } from "../../context/ChatboxContext";
 
 export const ChatInput = () => {
   const { sendMessage, setInputValue, inputValue } = useChatbotContext();
-
+  
   const handleSubmit = (e) => {
     e.preventDefault(); // Evita que el formulario recargue la página
     if (inputValue.trim()) {

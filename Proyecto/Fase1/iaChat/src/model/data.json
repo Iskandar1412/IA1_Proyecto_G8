@@ -1,0 +1,31 @@
+{
+    "entradas": {
+      "saludos": ["hola", "hey", "buenos días", "buenas noches", "qué tal", "saludos", "holi", "holaa"],
+      "despedidas": ["adios", "hasta luego", "nos vemos", "chao", "me voy", "hasta la próxima"],
+      "agradecimientos": ["gracias", "muchas gracias", "te lo agradezco", "mil gracias"],
+      "preguntas_comunes": [
+        "¿cómo estás?",
+        "¿qué haces?",
+        "¿quién eres?",
+        "¿qué eres?",
+        "¿cómo te llamas?"
+      ],
+      "información_tiempo": [
+        "¿qué hora es?",
+        "¿qué día es hoy?",
+        "¿cuál es la fecha?",
+        "¿es de día o de noche?",
+        "¿hace calor?"
+      ],
+      "información_bot": ["¿quién te creó?", "¿cómo funcionas?", "¿eres humano?"]
+    },
+    "respuestas": {
+      "saludos": "¡Hola! ¿En qué puedo ayudarte?",
+      "despedidas": "¡Adiós! Espero haberte ayudado.",
+      "agradecimientos": "¡De nada! Estoy aquí para ayudarte.",
+      "preguntas_comunes": "Soy IaChatbot, aquí para ayudarte con lo que necesites.",
+      "información_tiempo": "Lo siento, no puedo responder sobre el tiempo o la fecha.",
+      "información_bot": "Soy un chatbot creado para responder tus preguntas y ayudarte."
+    }
+  }
+  
