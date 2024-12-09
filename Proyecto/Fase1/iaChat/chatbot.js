@@ -1,5 +1,4 @@
 import * as tf from '@tensorflow/tfjs';
-import * as use from '@tensorflow-models/universal-sentence-encoder';
 
 const entradas = {
     saludos: ['hola','hey','buenos días','buenas noches'],
@@ -15,7 +14,7 @@ const respuestas = {
 let model;
 
 async function cargarModelo() {
-    model = await use.load();
+    model = load_model('seq2seq_model.h5')
     console.log('Modelo cargado');
 }
 
