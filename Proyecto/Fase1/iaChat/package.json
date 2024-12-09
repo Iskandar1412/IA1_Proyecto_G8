@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://Iskandar1412.github.io/IA1-DIC2024/",
+  "homepage": "https://iskandar1412.github.io/IA1_Proyecto_G8/",
   "scripts": {
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
