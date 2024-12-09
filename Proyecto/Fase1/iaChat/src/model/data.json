@@ -1,31 +1,77 @@
 {
-    "entradas": {
-      "saludos": ["hola", "hey", "buenos días", "buenas noches", "qué tal", "saludos", "holi", "holaa"],
-      "despedidas": ["adios", "hasta luego", "nos vemos", "chao", "me voy", "hasta la próxima"],
-      "agradecimientos": ["gracias", "muchas gracias", "te lo agradezco", "mil gracias"],
-      "preguntas_comunes": [
-        "¿cómo estás?",
-        "¿qué haces?",
-        "¿quién eres?",
-        "¿qué eres?",
-        "¿cómo te llamas?"
-      ],
-      "información_tiempo": [
-        "¿qué hora es?",
-        "¿qué día es hoy?",
-        "¿cuál es la fecha?",
-        "¿es de día o de noche?",
-        "¿hace calor?"
-      ],
-      "información_bot": ["¿quién te creó?", "¿cómo funcionas?", "¿eres humano?"]
-    },
-    "respuestas": {
-      "saludos": "¡Hola! ¿En qué puedo ayudarte?",
-      "despedidas": "¡Adiós! Espero haberte ayudado.",
-      "agradecimientos": "¡De nada! Estoy aquí para ayudarte.",
-      "preguntas_comunes": "Soy IaChatbot, aquí para ayudarte con lo que necesites.",
-      "información_tiempo": "Lo siento, no puedo responder sobre el tiempo o la fecha.",
-      "información_bot": "Soy un chatbot creado para responder tus preguntas y ayudarte."
-    }
+  "entradas": {
+    "saludos": [
+      "hola", "hey", "buenos días", "buenas noches", "qué tal", "saludos", "holi", "holaa", "¿qué tal todo?", "¿cómo va todo?", "¡buenas!", "¿qué onda?", "¡qué hay!", "¡hola, qué tal!", "¡buenas tardes!", "¡cómo estás!"
+    ],
+    "despedidas": [
+      "adios", "hasta luego", "nos vemos", "chao", "me voy", "hasta la próxima", "hasta pronto", "hasta más ver", "cuídate", "que te vaya bien", "nos estamos viendo", "chau chau", "hasta pronto, que estés bien", "adiós, ¡cuídate mucho!"
+    ],
+    "agradecimientos": [
+      "gracias", "muchas gracias", "te lo agradezco", "mil gracias", "te estoy muy agradecido", "te agradezco mucho", "gracias por tu ayuda", "te doy las gracias", "gracias de corazón", "estoy muy agradecido", "gracias por tu tiempo", "mil gracias por todo", "te agradezco enormemente"
+    ],
+    "preguntas_comunes": [
+      "¿cómo estás?", "¿qué haces?", "¿quién eres?", "¿qué eres?", "¿cómo te llamas?", "¿qué tal estás?", "¿cómo te encuentras?", "¿todo bien?", "¿cómo va todo?", "¿cómo estás hoy?", "¿todo tranquilo?", "¿cómo te va?", "¿qué tal tu día?"
+    ],
+    "información_tiempo": [
+      "¿qué hora es?", "¿qué día es hoy?", "¿cuál es la fecha?", "¿es de día o de noche?", "¿hace calor?", "¿está lloviendo?", "¿qué tiempo hace?", "¿cuál es la hora?", "¿está soleado?", "¿qué temperatura hace?", "¿hace frío?", "¿hay buen clima?", "¿qué tal el clima?"
+    ],
+    "información_bot": [
+      "¿quién te creó?", "¿cómo funcionas?", "¿eres humano?", "¿quién está detrás de ti?", "¿de qué estás hecho?", "¿quién programó tu código?", "¿quién te diseñó?", "¿cómo aprendes?", "¿cómo sabes lo que responder?", "¿cuál es tu propósito?", "¿cómo trabajas?", "¿cómo te entrenaron?", "¿cuál es tu objetivo?"
+    ]
+  },
+  "respuestas": {
+    "saludos": [
+      "¡Hola! ¿En qué puedo ayudarte?",
+      "¡Hola, qué tal! ¿Cómo puedo asistirte?",
+      "¡Buen día! ¿En qué te ayudo?",
+      "¡Buenas! ¿Qué tal todo?",
+      "¡Hey! ¿Cómo puedo ayudarte hoy?",
+      "¡Holi! ¿En qué te puedo echar una mano?",
+      "¡Hola! ¿Qué tal todo por ahí?",
+      "¡Qué onda! ¿En qué te ayudo?"
+    ],
+    "despedidas": [
+      "¡Adiós! Espero haberte ayudado.",
+      "¡Nos vemos! Que tengas un excelente día.",
+      "¡Hasta luego! Cuídate mucho.",
+      "¡Chao! ¡Espero verte pronto!",
+      "¡Adiós! ¡Hasta la próxima!",
+      "¡Nos vemos! ¡Cuídate mucho!",
+      "¡Hasta pronto! ¡Que tengas un gran día!",
+      "¡Chau chau! ¡Nos estamos viendo!"
+    ],
+    "agradecimientos": [
+      "¡De nada! Estoy aquí para ayudarte.",
+      "¡Con gusto! No dudes en preguntar si necesitas algo más.",
+      "¡A ti! Siempre es un placer ayudarte.",
+      "¡Es un placer ayudarte! ¡Cualquier cosa, aquí estoy!",
+      "¡Encantado de ayudarte! 😊",
+      "¡Es un placer! ¡No dudes en contactarme de nuevo!",
+      "¡De nada! ¡Siempre que necesites algo, estaré aquí!"
+    ],
+    "preguntas_comunes": [
+      "Soy IaChatbot, aquí para ayudarte con lo que necesites.",
+      "Soy un chatbot diseñado para responder a tus preguntas. ¿En qué puedo ayudarte hoy?",
+      "Soy IaChatbot, siempre listo para asistirte. ¿Cómo puedo ayudarte?",
+      "Soy IaChatbot, tu asistente virtual. ¿Qué te gustaría saber?",
+      "¡Hola! Soy IaChatbot, ¿en qué puedo ayudarte hoy?",
+      "Soy un asistente virtual llamado IaChatbot. ¿Qué necesitas?"
+    ],
+    "información_tiempo": [
+      "Lo siento, no puedo responder sobre el tiempo o la fecha.",
+      "Lamentablemente, no puedo decirte la hora o el clima.",
+      "No tengo información sobre el clima o la hora. ¿Hay algo más en lo que pueda ayudarte?",
+      "Lo siento, pero no puedo proporcionarte detalles sobre el tiempo o la hora.",
+      "No estoy diseñado para dar detalles sobre el tiempo o la fecha, pero puedo ayudarte con otras cosas.",
+      "No puedo decirte la hora ni el clima, pero estaré encantado de ayudarte con otras preguntas."
+    ],
+    "información_bot": [
+      "Soy un chatbot creado para responder tus preguntas y ayudarte.",
+      "Fui diseñado para asistirte con todo tipo de preguntas. Mi propósito es facilitarte la vida.",
+      "Soy IaChatbot, un asistente virtual creado para resolver dudas y ayudarte a encontrar información.",
+      "Soy un chatbot creado por un equipo de desarrollo. Mi objetivo es ayudarte a obtener respuestas rápidas.",
+      "Soy un asistente virtual llamado IaChatbot, creado para hacer tu experiencia más fácil y rápida.",
+      "Fui creado para responder a tus preguntas y ofrecerte asistencia. ¡Estoy aquí para ayudarte!"
+    ]
   }
-  
+}
