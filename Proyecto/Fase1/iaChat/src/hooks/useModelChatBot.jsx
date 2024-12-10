@@ -10,7 +10,7 @@ export const useModelChatBot = () => {
   // Función para cargar el modelo
   const loadModel = async () => {
     try {
-      const loadedModel = await tf.loadLayersModel("/tfjs_model/model.json");
+      const loadedModel = await tf.loadGraphModel("/tfjs_model/model.json");
       setModel(loadedModel);
       setIsLoading(false);
       console.log("Modelo cargado correctamente");
@@ -23,12 +23,9 @@ export const useModelChatBot = () => {
   // Tokenización: convertir texto a secuencia de números
   const textsToSequences = (tokenizer, text) => {
     const sequence = [];
-    
-    // Parsear tokenizer.config.word_index solo una vez al inicio
     const wordIndex = JSON.parse(tokenizer.config.word_index);
     
     text.split(" ").forEach((word) => {
-      // Verificar si la palabra existe en el índice
       if (wordIndex[word] !== undefined) {
         sequence.push(wordIndex[word]);
       }
@@ -47,11 +44,8 @@ export const useModelChatBot = () => {
   // Decodificación: convertir predicciones a texto
   const decodeOutput = (indices) => {
     let response = "";
-    // Parsear outputTokenizer.config.word_index solo una vez al inicio
     const wordIndex = JSON.parse(outputTokenizer.config.word_index);
-    
     indices.forEach((index) => {
-      // Buscar la palabra correspondiente al índice
       for (const [word, idx] of Object.entries(wordIndex)) {
         if (idx == index) {
           console.log(idx + "-" + word)
@@ -70,25 +64,23 @@ export const useModelChatBot = () => {
       return "El modelo no está listo";
     }
 
-    const maxInputLength = 20; // Longitud máxima definida en el modelo
-    const maxOutputLength = 20; // Longitud máxima definida en el modelo
+    const maxInputLength = 20;
+    const maxOutputLength = 20;
 
-    // Verificar y asignar los tokens <start> y <end>
     let startToken = JSON.parse(outputTokenizer.config.word_index)["<start>"];
     let endToken = JSON.parse(outputTokenizer.config.word_index)["<end>"];
 
     if (startToken === undefined || endToken === undefined) {
       console.warn("Tokens <start> o <end> no encontrados. Configurando manualmente.");
-      // Configurar manualmente si no están presentes
-      startToken = 1; // Generalmente es 1
-      endToken = 2;   // Generalmente es 2
+      startToken = 1;
+      endToken = 2;
     }
 
     // Preparar entrada del encoder
     const inputSequence = textsToSequences(inputTokenizer, inputText);
     const paddedSequence = padSequences(inputSequence, maxInputLength);
 
-    const encoderInputTensor = tf.tensor2d([paddedSequence], [1, maxInputLength]);
+    const encoderInputTensor = tf.tensor2d([paddedSequence], [1, maxInputLength], 'int32');
 
     let decoderInputSequence = [startToken];
     let response = "";
@@ -96,11 +88,10 @@ export const useModelChatBot = () => {
 
     while (!stopCondition && decoderInputSequence.length <= maxOutputLength) {
       const paddedDecoderInput = padSequences(decoderInputSequence, maxOutputLength);
-      const decoderInputTensor = tf.tensor2d([paddedDecoderInput], [1, maxOutputLength]);
-
-      const outputTokens = model.predict([encoderInputTensor, decoderInputTensor]);
-      const outputIndices = outputTokens.argMax(-1).dataSync();
-
+      const decoderInputTensor = tf.tensor2d([paddedDecoderInput], [1, maxOutputLength], 'int32');
+      const outputTokens = await model.executeAsync([encoderInputTensor, decoderInputTensor]);
+      const outputTensor = Array.isArray(outputTokens) ? outputTokens[0] : outputTokens;
+      const outputIndices = outputTensor.argMax(-1).dataSync();
       const nextToken = outputIndices[decoderInputSequence.length - 1];
 
       if (nextToken === endToken || response.split(" ").length >= maxOutputLength) {
@@ -109,12 +100,13 @@ export const useModelChatBot = () => {
         response += decodeOutput([nextToken]) + " ";
         decoderInputSequence.push(nextToken);
       }
-    }
-    
-    return response.replace("<start>", "").replace("<end>", "").trim();
-  };
 
-  // Cargar el modelo al inicio
+      tf.dispose(outputTokens);
+    }
+
+    return response.replace("<start>", "").replace("<end>", "").trim();
+};
+
   useEffect(() => {
     loadModel();
   }, []);
