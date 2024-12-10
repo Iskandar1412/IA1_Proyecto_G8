@@ -7,12 +7,12 @@
 
 ### Proyectos
 
-|     CARPETA     |   MD   | Fecha Entrega | Prorroga |
+|     CARPETA     |   Manual Tecnico | Manual de Usuario  | Fecha Entrega | Prorroga |
 | :-------------: | :----: | :-----------: | :------: |
-| [Proyecto 1 Fase 1](./Proyecto/Fase1/iaChat/) | [View](.) | 08/Diciembre |   ---   |
-| [Proyecto 1 Fase 2](./) | [View](.) | --- |   ---   |
-| [Proyecto 1 Fase 3](./) | [View](.) | --- |   ---   |
-| [Proyecto 1 Fase 4](./) | [View](.) | --- |   ---   |
+| [Proyecto 1 Fase 1](./Proyecto/Fase1/iaChat/) | [Manual Tecnico](./Documentacion/Practica/ManualTecnico.md) | [Manual de Usuario](./Documentacion/Practica/ManualUsuario.md) | 08/Diciembre |   09/Diciembre   |
+| [Proyecto 1 Fase 2](./)            | [View](.) | [View](.) | --- |   ---   |
+| [Proyecto 1 Fase 3](./)            | [View](.) | [View](.) | --- |   ---   |
+| [Proyecto 1 Fase 4](./)            | [View](.) | [View](.) | --- |   ---   |
 
 ### Enunciados
 
