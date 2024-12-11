@@ -17,8 +17,8 @@ La aplicación está desarrollada con React y Vite, proporcionando un entorno mo
 
 ## Explicación de la aplicación
 
-El usuario al ingresar a la página puede interactuar con el Chatbox
+El usuario puede ingresar al chatbox e interactuar con el mediante la sección de envío de mensaje
 
 ![alt text](./IMG/image.png)
 
-
+![interacción](https://github.com/user-attachments/assets/523499f8-4d48-44ab-a8e1-3f4455b79dda)
