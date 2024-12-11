@@ -393,16 +393,16 @@ export const useModelChatBot = () => {
 ```
 * **cargarModelo**: Es una función que intenta cargar un modelo de TensorFlow desde el path (/tfjs_model/model.json), además de esto, la función permite indicar al código si el modelo fue cargado o no para su posterior manipulación.
 * **textoASecuencias** : Convierte el texto en una secuencia de números utilizando un tokenizador.
-    * tokenizeText: Se encarga de convertir el texto a minúsculas, reemplazar signos de puntuación por espacios y dividir el texto en palabras, para que luego convertir cada palabra en un número usando el índice de la palabra en el tokenizador.
+    * **tokenizeText**: Se encarga de convertir el texto a minúsculas, reemplazar signos de puntuación por espacios y dividir el texto en palabras, para que luego convertir cada palabra en un número usando el índice de la palabra en el tokenizador.
 * **padSequences**: Se encarga de asegurar que las secuencias tengan una longitud fija, si la secuencia es más corta, se completa con ceros. Si es más larga, se recorta.
 * **decodeOutput**: Convierte los índices de las predicciones del modelo de vuelta a palabras utilizando el word_index del tokenizador de salida.
-      *    Se invierte el **wordIndex** para obtener un mapeo de índices a palabras, los índices de las predicciones se convierten en palabras y se ensamblan en una cadena de texto.
+  * Se invierte el **wordIndex** para obtener un mapeo de índices a palabras, los índices de las predicciones se convierten en palabras y se ensamblan en una cadena de texto.
 * **generarRespuesta**: Es la función principal para generar la respuesta del chatbot. Acepta un texto de entrada y genera una respuesta.
-      * Primero, verifica si el modelo está cargado.
-      * Luego, procesa el texto de entrada con la tokenización y el padding, y prepara las secuencias para el modelo.
-      * **decodificarSecuenciaInput**: Comienza con el token de inicio, y el modelo genera palabras sucesivas hasta que alcanza el token de fin.
-      * Para cada predicción, se decodifica el índice a palabra, y se agrega a la respuesta.
-      * El proceso se repite hasta que se genera una respuesta completa.
+  *  Primero, verifica si el modelo está cargado.
+  *  Luego, procesa el texto de entrada con la tokenización y el padding, y prepara las secuencias para el modelo.
+  *  **decodificarSecuenciaInput**: Comienza con el token de inicio, y el modelo genera palabras sucesivas hasta que alcanza el token de fin.
+  *  Para cada predicción, se decodifica el índice a palabra, y se agrega a la respuesta.
+  *  El proceso se repite hasta que se genera una respuesta completa.
   
 ### LINK DE COLAB DEL MODELO
 ```
