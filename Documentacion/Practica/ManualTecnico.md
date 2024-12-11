@@ -260,7 +260,13 @@ export async function generarRespuesta(userInput) {
 * Para cada categoría, calcula una métrica de similitud entre el texto ingresado y los ejemplos asociados; permitiendo de cierta forma el determinar qué categoría de entrada coincide mejor con la intención del usuario.
 * Una vez el modelo identifica la categoria o intención del usuario escrito en el texto, el sistema se encarga de buscar una respuesta asociada a dicha categoria; para el caso que no encuentre una categoria adecuada, devolverá un mensaje predeterminado en el cual le dice al usuario que no comprende la entrada realizada anteriormente.
 
-## Conclusiones
+### Comando para exportación modelo (Python a JS)
+
+```bash
+!tensorflowjs_converter --input_format=tf_saved_model --output_format=tfjs_graph_model --control_flow_v2=true  sample_data/tf_model/ sample_data/tfjs_model2
+```
+
+## Concluciones
 
 * El modelo Seq2Seq basado en LSTM demostró ser efectivo para la generación de respuestas en lenguaje natural, aprendiendo directamente de los datos etiquetados; demostrando su capacidad para poder generalizar y adaptarse a nuevos contextos, convirtiendolo en una solución robusta para dominios complejos.
 * El chatbot basado en Universal Sentence Encoder es más rápido en la implementación y rápidez de manejar tareas de clasifcación de texto en tiempo real, haciendo de mencion sus limintaciones en ejemplos predefinidos, siendo una solución eficiente y escalable para sistemas que requieren interacciones rápidas y controladas.
