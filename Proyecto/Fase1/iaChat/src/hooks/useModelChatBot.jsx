@@ -20,17 +20,25 @@ export const useModelChatBot = () => {
     }
   };
 
-  // Tokenización: convertir texto a secuencia de números
+  // Tokenización: convertir texto a secuencia de números con preprocesamiento mejorado
   const textsToSequences = (tokenizer, text) => {
     const sequence = [];
     const wordIndex = JSON.parse(tokenizer.config.word_index);
-    
-    text.split(" ").forEach((word) => {
+
+    // Preprocesar texto: manejar signos especiales y convertir a minúsculas
+    const tokenizeText = (text) => {
+      return text
+        .toLowerCase() // Convertir a minúsculas
+        .replace(/([.,!?¿¡])/g, " $1 ") // Separar signos de puntuación
+        .split(/\s+/); // Dividir en palabras eliminando espacios extra
+    };
+
+    tokenizeText(text).forEach((word) => {
       if (wordIndex[word] !== undefined) {
         sequence.push(wordIndex[word]);
       }
     });
-    
+
     return sequence;
   };
 
@@ -45,15 +53,18 @@ export const useModelChatBot = () => {
   const decodeOutput = (indices) => {
     let response = "";
     const wordIndex = JSON.parse(outputTokenizer.config.word_index);
+    
+    // Invertir el mapa de índices para buscar palabras
+    const indexToWord = Object.fromEntries(
+      Object.entries(wordIndex).map(([word, idx]) => [idx, word])
+    );
+
     indices.forEach((index) => {
-      for (const [word, idx] of Object.entries(wordIndex)) {
-        if (idx == index) {
-          console.log(idx + "-" + word)
-          response += word + " ";
-          break;
-        }
+      if (indexToWord[index]) {
+        response += indexToWord[index] + " ";
       }
     });
+
     return response.trim();
   };
 
@@ -76,9 +87,9 @@ export const useModelChatBot = () => {
     }
 
     // Preparar entrada del encoder
-    const inputSequence = textsToSequences(inputTokenizer, inputText);
+    const inputSequence = textsToSequences(inputTokenizer, inputText.toLowerCase());
     const paddedSequence = padSequences(inputSequence, maxInputLength);
-    const encoderInputTensor = tf.tensor2d([paddedSequence], [1, maxInputLength], 'int32');
+    const encoderInputTensor = tf.tensor2d([paddedSequence], [1, maxInputLength], "int32");
 
     let decoderInputSequence = [startToken];
     let response = "";
@@ -86,13 +97,13 @@ export const useModelChatBot = () => {
 
     while (!stopCondition && decoderInputSequence.length <= maxOutputLength) {
       const paddedDecoderInput = padSequences(decoderInputSequence, maxOutputLength);
-      const decoderInputTensor = tf.tensor2d([paddedDecoderInput], [1, maxOutputLength], 'int32');
+      const decoderInputTensor = tf.tensor2d([paddedDecoderInput], [1, maxOutputLength], "int32");
       const outputTokens = await model.executeAsync([encoderInputTensor, decoderInputTensor]);
 
       const outputTensor = Array.isArray(outputTokens) ? outputTokens[0] : outputTokens;
       const outputIndices = outputTensor.argMax(-1).dataSync();
       const nextToken = outputIndices[decoderInputSequence.length - 1];
-      
+
       if (nextToken === endToken || response.split(" ").length >= maxOutputLength) {
         stopCondition = true;
       } else {
@@ -104,7 +115,7 @@ export const useModelChatBot = () => {
     }
 
     return response.replace("<start>", "").replace("<end>", "").trim();
-};
+  };
 
   useEffect(() => {
     loadModel();
