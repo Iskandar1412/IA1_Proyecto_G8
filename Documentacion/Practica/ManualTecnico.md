@@ -10,12 +10,14 @@ El enfoque del proyecto incluyó la creación de una estructura modular en React
 
 Este proyecto demostró la capacidad de implementar un modelo de inteligencia artificial funcional en un entorno web moderno, asegurando un alto nivel de rendimiento y accesibilidad para los usuarios.
 
-## Requisitos del Sistema
+## Requisitos Mínimos del Sistema
 
-> **Systema Operativo:** Windows, Ubuntu 22.04 o superior, arch linux
+> **Systema Operativo:** Windows 7 o superior, Ubuntu 22.04 o superior, arch linux
 > **CPU:** Intel Pentium D o AMD Athlon 64 (K8) 2.6GHz o superior
-> **RAM:** 4GB
-> **Lenguajes Utilizados:** React
+> **RAM:** 8GB
+> **Framework Frontend:** React + Vite (npm version 10.9.2)
+> **Lenguaje Modelo:** JavaScript
+> **Lenguaje Modelo:** Python (version 3.12.7)
 > **IDE:** Visual Studio Code
 
 ## Explicación del Código
@@ -265,6 +267,8 @@ export async function generarRespuesta(userInput) {
 ```bash
 !tensorflowjs_converter --input_format=tf_saved_model --output_format=tfjs_graph_model --control_flow_v2=true  sample_data/tf_model/ sample_data/tfjs_model2
 ```
+
+Este comando se encarga de la conversión del modelo para exportarlo a modelo de JavaScript.
 
 ## Concluciones
 
