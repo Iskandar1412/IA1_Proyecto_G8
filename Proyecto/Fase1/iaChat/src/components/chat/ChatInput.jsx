@@ -5,16 +5,16 @@ export const ChatInput = () => {
   const { sendMessage, setInputValue, inputValue } = useChatbotContext();
   
   const handleSubmit = (e) => {
-    e.preventDefault(); // Evita que el formulario recargue la página
+    e.preventDefault();
     if (inputValue.trim()) {
-      sendMessage(inputValue); // Envía el mensaje usando el contexto
-      setInputValue(""); // Limpia el campo de entrada
+      sendMessage(inputValue);
+      setInputValue("");
     }
   };
 
   return (
     <form
-      onSubmit={handleSubmit} // Maneja el evento de envío
+      onSubmit={handleSubmit}
       className="flex flex-row items-center h-16 rounded-xl bg-white w-full px-4"
     >
       <div className="flex-grow ml-4">
@@ -24,13 +24,13 @@ export const ChatInput = () => {
             className="flex w-full border rounded-xl focus:outline-none focus:border-indigo-300 pl-4 h-10"
             value={inputValue}
             placeholder="Type your message..."
-            onChange={(e) => setInputValue(e.target.value)} // Actualiza el estado del input
+            onChange={(e) => setInputValue(e.target.value)}
           />
         </div>
       </div>
       <div className="ml-4">
         <button
-          type="submit" // Cambiado a "submit" para integrarse con el formulario
+          type="submit"
           className="flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 rounded-xl text-white px-4 py-1 flex-shrink-0"
         >
           <span>Send</span>
