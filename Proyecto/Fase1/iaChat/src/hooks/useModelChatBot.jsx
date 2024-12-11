@@ -10,7 +10,7 @@ export const useModelChatBot = () => {
   // Función para cargar el modelo
   const loadModel = async () => {
     try {
-      const loadedModel = await tf.loadGraphModel("/tfjs_model/model.json");
+      const loadedModel = await tf.loadGraphModel("./tfjs_model/model.json");
       setModel(loadedModel);
       setIsLoading(false);
       console.log("Modelo cargado correctamente");
@@ -69,7 +69,6 @@ export const useModelChatBot = () => {
 
     let startToken = JSON.parse(outputTokenizer.config.word_index)["<start>"];
     let endToken = JSON.parse(outputTokenizer.config.word_index)["<end>"];
-
     if (startToken === undefined || endToken === undefined) {
       console.warn("Tokens <start> o <end> no encontrados. Configurando manualmente.");
       startToken = 1;
@@ -79,7 +78,6 @@ export const useModelChatBot = () => {
     // Preparar entrada del encoder
     const inputSequence = textsToSequences(inputTokenizer, inputText);
     const paddedSequence = padSequences(inputSequence, maxInputLength);
-
     const encoderInputTensor = tf.tensor2d([paddedSequence], [1, maxInputLength], 'int32');
 
     let decoderInputSequence = [startToken];
@@ -90,10 +88,11 @@ export const useModelChatBot = () => {
       const paddedDecoderInput = padSequences(decoderInputSequence, maxOutputLength);
       const decoderInputTensor = tf.tensor2d([paddedDecoderInput], [1, maxOutputLength], 'int32');
       const outputTokens = await model.executeAsync([encoderInputTensor, decoderInputTensor]);
+
       const outputTensor = Array.isArray(outputTokens) ? outputTokens[0] : outputTokens;
       const outputIndices = outputTensor.argMax(-1).dataSync();
       const nextToken = outputIndices[decoderInputSequence.length - 1];
-
+      
       if (nextToken === endToken || response.split(" ").length >= maxOutputLength) {
         stopCondition = true;
       } else {
