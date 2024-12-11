@@ -31,72 +31,54 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, LSTM, Dense
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
 
-latent_dim = 256 
-num_samples = 10000
-max_input_length = 20
-max_output_length = 20 
+import pandas as pd
 
-input_texts = [
-    "Hola",
-    "¿Cómo estás?",
-    "¿Qué haces?",
-    "Adiós",
-    "¿Cuál es tu nombre?",
-    "¿Qué día es hoy?",
-    "Cuéntame un chiste",
-    "¿Dónde estás?",
-    "¿Qué te gusta hacer?",
-    "Gracias",
-    "Buenos días",
-    "Buenas noches",
-    "¿Cuál es tu color favorito?",
-    "¿Puedes ayudarme?",
-    "¿Cómo funciona esto?",
-    "Dime algo interesante",
-    "¿Qué hora es?",
-    "Recomiéndame un libro",
-    "¿Cuál es tu comida favorita?",
-]
+# ============================
+# Configuración de parámetros
+# ============================
+latent_dim = 256  # Dimensión del espacio latente para LSTM
+num_samples = 10000  # Número máximo de muestras
+max_input_length = 20  # Longitud máxima de las secuencias de entrada
+max_output_length = 20  # Longitud máxima de las secuencias de salida
 
-output_texts = [
-    "<start> Hola <end>",
-    "<start> Estoy bien, gracias <end>",
-    "<start> Nada en particular <end>",
-    "<start> Hasta luego <end>",
-    "<start> Mi nombre es ChatBot <end>",
-    "<start> Hoy es un gran día <end>",
-    "<start> ¿Qué hace una abeja en el gimnasio? ¡Zum-ba! <end>",
-    "<start> Estoy aquí, contigo <end>",
-    "<start> Me gusta aprender cosas nuevas <end>",
-    "<start> De nada <end>",
-    "<start> Buenos días, ¿cómo estás? <end>",
-    "<start> Que tengas buenas noches <end>",
-    "<start> Mi color favorito es el azul <end>",
-    "<start> Claro, dime en qué necesitas ayuda <end>",
-    "<start> Esto funciona con inteligencia artificial <end>",
-    "<start> El sol es una estrella increíblemente grande <end>",
-    "<start> No llevo reloj, pero es un buen momento <end>",
-    "<start> Te recomiendo 'El principito' <end>",
-    "<start> Me encanta la pizza <end>",
-]
 
+# Leer el archivo TSV con pandas
+file_path = "dataset.tsv"
+data = pd.read_csv(file_path, sep="\t")
+
+# Extraer columnas "Question" y "Answer"
+input_texts = data["Question"].tolist()
+output_texts = ["<start> " + answer + " <end>" for answer in data["Answer"].tolist()]
+
+# ========================
+# Preprocesamiento de datos
+# ========================
+# Tokenización de las secuencias
 input_tokenizer = Tokenizer()
-output_tokenizer = Tokenizer(filters="")  
+output_tokenizer = Tokenizer(filters="")  # Importante: no filtrar caracteres especiales
 
 input_tokenizer.fit_on_texts(input_texts)
 output_tokenizer.fit_on_texts(output_texts)
 
 input_sequences = input_tokenizer.texts_to_sequences(input_texts)
 output_sequences = output_tokenizer.texts_to_sequences(output_texts)
+
+# Agregar padding para las secuencias
 encoder_input_data = pad_sequences(input_sequences, maxlen=max_input_length, padding="post")
 decoder_input_data = pad_sequences([seq[:-1] for seq in output_sequences], maxlen=max_output_length, padding="post")
 decoder_target_data = pad_sequences([seq[1:] for seq in output_sequences], maxlen=max_output_length, padding="post")
+
+# Convertir los objetivos en one-hot encoding
 num_decoder_tokens = len(output_tokenizer.word_index) + 1
 decoder_target_data = tf.keras.utils.to_categorical(decoder_target_data, num_decoder_tokens)
 
+# ===================
+# Construcción del modelo
+# ===================
 # Encoder
-encoder_inputs = Input(shape=(None,), dtype="int32")
+encoder_inputs = Input(shape=(None,), dtype="int32")  # Entrada es una secuencia de índices
 encoder_embedding = tf.keras.layers.Embedding(input_dim=len(input_tokenizer.word_index) + 1,
                                                output_dim=latent_dim,
                                                mask_zero=True)(encoder_inputs)
@@ -105,7 +87,7 @@ _, state_h, state_c = encoder_lstm(encoder_embedding)
 encoder_states = [state_h, state_c]
 
 # Decoder
-decoder_inputs = Input(shape=(None,), dtype="int32") 
+decoder_inputs = Input(shape=(None,), dtype="int32")  # Entrada es una secuencia de índices
 decoder_embedding = tf.keras.layers.Embedding(input_dim=len(output_tokenizer.word_index) + 1,
                                                output_dim=latent_dim,
                                                mask_zero=True)(decoder_inputs)
@@ -113,19 +95,38 @@ decoder_lstm = LSTM(latent_dim, return_sequences=True, return_state=True)
 decoder_outputs, _, _ = decoder_lstm(decoder_embedding, initial_state=encoder_states)
 decoder_dense = Dense(len(output_tokenizer.word_index) + 1, activation="softmax")
 decoder_outputs = decoder_dense(decoder_outputs)
+
+# Modelo Seq2Seq
 model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
+
+# Compilar el modelo
 model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
 
+# Resumen del modelo
+model.summary()
 
+# ===================
+# Entrenamiento del modelo
+# ===================
 model.fit(
     [encoder_input_data, decoder_input_data],
     decoder_target_data,
-    batch_size=64,
-    epochs=100,
+    batch_size=16,
+    epochs=50,
     validation_split=0.2,
+    callbacks=[
+        EarlyStopping(patience=5, monitor="val_loss"),
+        ReduceLROnPlateau(monitor="val_loss", factor=0.5, patience=3)
+    ]
 )
 
+# ===================
+# Modelos para inferencia
+# ===================
+# Encoder para inferencia
 encoder_model = Model(encoder_inputs, encoder_states)
+
+# Decoder para inferencia
 decoder_state_input_h = Input(shape=(latent_dim,))
 decoder_state_input_c = Input(shape=(latent_dim,))
 decoder_states_inputs = [decoder_state_input_h, decoder_state_input_c]
@@ -141,39 +142,58 @@ decoder_model = Model(
     [decoder_outputs] + decoder_states,
 )
 
+# ===================
+# Función para decodificar secuencias
+# ===================
 reverse_input_word_index = dict((i, word) for word, i in input_tokenizer.word_index.items())
 reverse_output_word_index = dict((i, word) for word, i in output_tokenizer.word_index.items())
 
 
 def decode_sequence(input_seq):
+    # Obtener los estados del encoder
     states_value = encoder_model.predict(input_seq)
+
+    # Crear la secuencia inicial del decoder
     target_seq = np.zeros((1, 1))
     target_seq[0, 0] = output_tokenizer.word_index["<start>"]
 
+    # Almacenar la respuesta generada
     stop_condition = False
     decoded_sentence = ""
     while not stop_condition:
         output_tokens, h, c = decoder_model.predict([target_seq] + states_value)
+
+        # Obtener el índice del token predicho
         sampled_token_index = np.argmax(output_tokens[0, -1, :])
         sampled_word = reverse_output_word_index.get(sampled_token_index, "")
+
         decoded_sentence += " " + sampled_word
+
+        # Condición de parada: token de fin o longitud máxima alcanzada
         if sampled_word == "<end>" or len(decoded_sentence.split()) > max_output_length:
             stop_condition = True
 
+        # Actualizar la secuencia objetivo
         target_seq = np.zeros((1, 1))
         target_seq[0, 0] = sampled_token_index
 
+        # Actualizar los estados
         states_value = [h, c]
 
     return decoded_sentence
 tf.keras.models.save_model(model, 'model.h5')
 tf.saved_model.save(model, 'sample_data/tf_model')
+# ===================
+# Probar el chatbot
+# ===================
 def chat_with_bot(input_text):
     input_seq = pad_sequences(input_tokenizer.texts_to_sequences([input_text]), maxlen=max_input_length, padding="post")
     response = decode_sequence(input_seq)
     return response.replace("<start>", "").replace("<end>", "").strip()
 
 
+
+# Ejemplo de interacción
 print(chat_with_bot("Hola"))
 print("----")
 print(chat_with_bot("¿Cómo estás?"))
@@ -182,10 +202,13 @@ print("----")
 print(chat_with_bot("Cuéntame un chiste"))
 
 import json
+
+# Exportar input_tokenizer a JSON
 input_tokenizer_json = input_tokenizer.to_json()
 with open("input_tokenizer.json", "w") as f:
     f.write(input_tokenizer_json)
 
+# Exportar output_tokenizer a JSON
 output_tokenizer_json = output_tokenizer.to_json()
 with open("output_tokenizer.json", "w") as f:
     f.write(output_tokenizer_json)
@@ -209,69 +232,179 @@ print("Tokenizadores exportados como input_tokenizer.json y output_tokenizer.jso
     * Entrenamiento del modelo: Este utiliza pares de preguntas y respuestas para enseñar al modelo a predecir una salida basada en una entrada, podiendo permitir al usuario a introducir un texto y poder de esta forma obtener respuestas generadas por el mismo.
 * Resultados Esperados: Se puede decir que se pueden obtener respuestas simples y coherentes basadas en los datos de entrenamiento proporcionados, en lo que es la capacidad de aprender patrones, si lleva su buena cantidad de preguntas pero poco a poco aprende patrones en lo que es la relación de pregunta-respuesta.
 
-### Modelo Chatbot (modelChatbot.js)
-
-```js
-import * as tf from '@tensorflow/tfjs';
-import * as use from '@tensorflow-models/universal-sentence-encoder';
-import data from './data.json';
-
-const { entradas, respuestas } = data;
-
-let model = null;
-
-export async function cargarModelo() {
-    if (!model) {
-        model = await use.load();
-        console.log('Modelo cargado');
-    }
-    return model;
-}
-
-export async function reconocerInput(userInput) {
-    if (!model) throw new Error('El modelo no está cargado.');
-    const userInputEmb = await model.embed([userInput]);
-    let punteo = -1;
-    let entradaReconocida = null;
-
-    for (const [entrada, examples] of Object.entries(entradas)) {
-        const examplesEmb = await model.embed(examples);
-        const scores = await tf.matMul(userInputEmb, examplesEmb, false, true).data();
-        const maxExampleScore = Math.max(...scores);
-        if (maxExampleScore > punteo) {
-            punteo = maxExampleScore;
-            entradaReconocida = entrada;
-        }
-    }
-
-    return entradaReconocida;
-}
-
-export async function generarRespuesta(userInput) {
-    const entrada = await reconocerInput(userInput);
-    if (entrada && respuestas[entrada]) {
-        return respuestas[entrada];
-    } else {
-        return 'Lo siento, no logro comprenderte, ¿Puedes volver a repetirlo?';
-    }
-}
+### DATASET
+Para entrenar el modelo de tensorflow es necesario un dataset, en este proyecto se utilizó un archivo csv con el siguiente formato:
+```
+Question	Answer	Source	Metadata
+¿Eres mayor que yo?	En realidad, no tengo edad. Los bots no cumplimos años.	qna_chitchat_Friendly	editorial:chitchat
+Eres una bebé	En realidad, no tengo edad. Los bots no cumplimos años.	qna_chitchat_Friendly	editorial:chitchat
+Dime cuál es tu edad	En realidad, no tengo edad. Los bots no cumplimos años.	qna_chitchat_Friendly	editorial:chitchat
+....
+Me siento súper baldado	He oído que no hay nada como una buena siesta.	qna_chitchat_Friendly	editorial:chitchat
+Me siento súper cansada	He oído que no hay nada como una buena siesta.	qna_chitchat_Friendly	editorial:chitchat
+Me siento súper hastiado	He oído que no hay nada como una buena siesta.	qna_chitchat_Friendly	editorial:chitchat
+```
+Este fue modificado en ciertos aspectos, a continuación se encuentra el link hacia el archivo en caso de querer utilizarlo:
+```
+https://qnamakerstore.blob.core.windows.net/qnamakerdata/editorial/spanish/qna_chitchat_friendly.tsv
 ```
 
-* Para este modelo se convierten frases en vectores numéricos para permitir la similitud entre las frases de manera más eficiente, de forma que el modelo se carga una única vez y se puede reutilizar para procesar multiples entradas, y mejorando el rendimiento del mismo.
-* Cuando el usuario realiza una entrada (userInput), el sistema convierte dicha entrada y la representa utilizando el modelo USE. Posteriormente compara dicha representacón con un conjunto de ejemplos almacenados en el archivo JSON (data.json) el cual contiene las entradas predefinidas agrupadas por categorías, etc.
-* Para cada categoría, calcula una métrica de similitud entre el texto ingresado y los ejemplos asociados; permitiendo de cierta forma el determinar qué categoría de entrada coincide mejor con la intención del usuario.
-* Una vez el modelo identifica la categoria o intención del usuario escrito en el texto, el sistema se encarga de buscar una respuesta asociada a dicha categoria; para el caso que no encuentre una categoria adecuada, devolverá un mensaje predeterminado en el cual le dice al usuario que no comprende la entrada realizada anteriormente.
-
 ### Comando para exportación modelo (Python a JS)
-
+Dado que el modelo fue entrenado en python, es necesario realizar la exportación a js por cuestiones de restricciones del proyecto, este comando se encarga de la conversión del modelo para exportarlo a JavaScript.
 ```bash
 !tensorflowjs_converter --input_format=tf_saved_model --output_format=tfjs_graph_model --control_flow_v2=true  sample_data/tf_model/ sample_data/tfjs_model2
 ```
 
-Este comando se encarga de la conversión del modelo para exportarlo a modelo de JavaScript.
 
-## Concluciones
 
-* El modelo Seq2Seq basado en LSTM demostró ser efectivo para la generación de respuestas en lenguaje natural, aprendiendo directamente de los datos etiquetados; demostrando su capacidad para poder generalizar y adaptarse a nuevos contextos, convirtiendolo en una solución robusta para dominios complejos.
-* El chatbot basado en Universal Sentence Encoder es más rápido en la implementación y rápidez de manejar tareas de clasifcación de texto en tiempo real, haciendo de mencion sus limintaciones en ejemplos predefinidos, siendo una solución eficiente y escalable para sistemas que requieren interacciones rápidas y controladas.
-* Los dos modelos cumplen el propósito que requieren para lo que es la interacción con usuarios, resultando el modelo Seq2Sec como un modelo ideal para escenarios dinámicos y generativos y el segundo modelo para interacciones predefinidas y controladas.
+
+### Uso Del Modelo (useModelChatBot.jsx)
+Este código corresponde a un custom hook de React que se utiliza para interactuar con el modelo de TensorFlow.js para crear un chatbot. A continuación, te explico cada sección del código de manera detallada.
+```js
+import { useState, useEffect } from "react";
+import * as tf from "@tensorflow/tfjs";
+import inputTokenizer from "./input_tokenizer.json";
+import outputTokenizer from "./output_tokenizer.json";
+
+export const useModelChatBot = () => {
+  const [model, setModel] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Función para cargar el modelo
+  const cargarModelo = async () => {
+    try {
+      const loadedModel = await tf.loadGraphModel("/tfjs_model/model.json");
+      setModel(loadedModel);
+      setIsLoading(false);
+      console.log("Modelo cargado correctamente");
+    } catch (error) {
+      console.error("Error al cargar el modelo:", error);
+      setIsLoading(false);
+    }
+  };
+
+  // Tokenización: convertir texto a secuencia de números con preprocesamiento mejorado
+  const textoASecuencias = (tokenizer, text) => {
+    const sequence = [];
+    const wordIndex = JSON.parse(tokenizer.config.word_index);
+
+    // Preprocesar texto: manejar signos especiales y convertir a minúsculas
+    const tokenizeText = (text) => {
+      return text
+        .toLowerCase()
+        .replace(/([.,!?¿¡])/g, " $1 ")
+        .split(/\s+/);
+    };
+
+    tokenizeText(text).forEach((word) => {
+      if (wordIndex[word] !== undefined) {
+        sequence.push(wordIndex[word]);
+      }
+    });
+
+    return sequence;
+  };
+
+  // Padding de secuencias
+  const padSequences = (sequence, maxLen) => {
+    const padded = Array(maxLen).fill(0);
+    sequence.slice(0, maxLen).forEach((value, idx) => (padded[idx] = value));
+    return padded;
+  };
+
+  // Decodificación: convertir predicciones a texto
+  const decodeOutput = (indices) => {
+    let response = "";
+    const wordIndex = JSON.parse(outputTokenizer.config.word_index);
+    
+    // Invertir el mapa de índices para buscar palabras
+    const indexToWord = Object.fromEntries(
+      Object.entries(wordIndex).map(([word, idx]) => [idx, word])
+    );
+
+    indices.forEach((index) => {
+      if (indexToWord[index]) {
+        response += indexToWord[index] + " ";
+      }
+    });
+
+    return response.trim();
+  };
+
+  // Función para generar respuesta
+  const generarRespuesta = async (inputText) => {
+    if (!model) {
+      console.error("El modelo no está cargado aún");
+      return "El modelo no está listo";
+    }
+
+    const maxInputLength = 20;
+    const maxOutputLength = 20;
+
+    let startToken = JSON.parse(outputTokenizer.config.word_index)["<start>"];
+    let endToken = JSON.parse(outputTokenizer.config.word_index)["<end>"];
+    if (startToken === undefined || endToken === undefined) {
+      console.warn("Tokens <start> o <end> no encontrados. Configurando manualmente.");
+      startToken = 1;
+      endToken = 2;
+    }
+
+    // Preparar entrada del encoder
+    const inputSequence = textoASecuencias(inputTokenizer, inputText.toLowerCase());
+    const paddedSequence = padSequences(inputSequence, maxInputLength);
+    const encoderInputTensor = tf.tensor2d([paddedSequence], [1, maxInputLength], "int32");
+
+    let decodificarSecuenciaInput = [startToken];
+    let response = "";
+    let stopCondition = false;
+
+    while (!stopCondition && decodificarSecuenciaInput.length <= maxOutputLength) {
+      const paddedDecoderInput = padSequences(decodificarSecuenciaInput, maxOutputLength);
+      const decoderInputTensor = tf.tensor2d([paddedDecoderInput], [1, maxOutputLength], "int32");
+      const outputTokens = await model.executeAsync([encoderInputTensor, decoderInputTensor]);
+
+      const outputTensor = Array.isArray(outputTokens) ? outputTokens[0] : outputTokens;
+      const outputIndices = outputTensor.argMax(-1).dataSync();
+      const nextToken = outputIndices[decodificarSecuenciaInput.length - 1];
+
+      if (nextToken === endToken || response.split(" ").length >= maxOutputLength) {
+        stopCondition = true;
+      } else {
+        response += decodeOutput([nextToken]) + " ";
+        decodificarSecuenciaInput.push(nextToken);
+      }
+
+      tf.dispose(outputTokens);
+    }
+
+    return response.replace("<start>", "").replace("<end>", "").trim();
+  };
+
+  useEffect(() => {
+    cargarModelo();
+  }, []);
+
+  return {
+    isLoading,
+    generarRespuesta,
+  };
+};
+
+```
+* **cargarModelo**: Es una función que intenta cargar un modelo de TensorFlow desde el path (/tfjs_model/model.json), además de esto, la función permite indicar al código si el modelo fue cargado o no para su posterior manipulación.
+* **textoASecuencias** : Convierte el texto en una secuencia de números utilizando un tokenizador.
+    * tokenizeText: Se encarga de convertir el texto a minúsculas, reemplazar signos de puntuación por espacios y dividir el texto en palabras, para que luego convertir cada palabra en un número usando el índice de la palabra en el tokenizador.
+* **padSequences**: Se encarga de asegurar que las secuencias tengan una longitud fija, si la secuencia es más corta, se completa con ceros. Si es más larga, se recorta.
+* **decodeOutput**: Convierte los índices de las predicciones del modelo de vuelta a palabras utilizando el word_index del tokenizador de salida.
+      *    Se invierte el **wordIndex** para obtener un mapeo de índices a palabras, los índices de las predicciones se convierten en palabras y se ensamblan en una cadena de texto.
+* **generarRespuesta**: Es la función principal para generar la respuesta del chatbot. Acepta un texto de entrada y genera una respuesta.
+      * Primero, verifica si el modelo está cargado.
+      * Luego, procesa el texto de entrada con la tokenización y el padding, y prepara las secuencias para el modelo.
+      * **decodificarSecuenciaInput**: Comienza con el token de inicio, y el modelo genera palabras sucesivas hasta que alcanza el token de fin.
+      * Para cada predicción, se decodifica el índice a palabra, y se agrega a la respuesta.
+      * El proceso se repite hasta que se genera una respuesta completa.
+  
+### LINK DE COLAB DEL MODELO
+```
+https://colab.research.google.com/drive/1THxV3Qy_JrS1Vrf0ufBHD1JMMlAaA64g?authuser=1#scrollTo=TGpqZgHQIGlJ
+```
