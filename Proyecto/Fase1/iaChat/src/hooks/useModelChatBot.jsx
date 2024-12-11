@@ -10,7 +10,7 @@ export const useModelChatBot = () => {
   // Función para cargar el modelo
   const loadModel = async () => {
     try {
-      const loadedModel = await tf.loadGraphModel("/tfjs_model/model.json");
+      const loadedModel = await tf.loadGraphModel("./tfjs_model/model.json");
       setModel(loadedModel);
       setIsLoading(false);
       console.log("Modelo cargado correctamente");
