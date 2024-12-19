@@ -8,7 +8,7 @@ export const useModelChatBot = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   // Función para cargar el modelo
-  const loadModel = async () => {
+  const cargarModelo = async () => {
     try {
       const loadedModel = await tf.loadGraphModel("./tfjs_model/model.json");
       setModel(loadedModel);
@@ -21,7 +21,7 @@ export const useModelChatBot = () => {
   };
 
   // Tokenización: convertir texto a secuencia de números con preprocesamiento mejorado
-  const textsToSequences = (tokenizer, text) => {
+  const textoASecuencias = (tokenizer, text) => {
     const sequence = [];
     const wordIndex = JSON.parse(tokenizer.config.word_index);
 
@@ -87,28 +87,28 @@ export const useModelChatBot = () => {
     }
 
     // Preparar entrada del encoder
-    const inputSequence = textsToSequences(inputTokenizer, inputText.toLowerCase());
+    const inputSequence = textoASecuencias(inputTokenizer, inputText.toLowerCase());
     const paddedSequence = padSequences(inputSequence, maxInputLength);
     const encoderInputTensor = tf.tensor2d([paddedSequence], [1, maxInputLength], "int32");
 
-    let decoderInputSequence = [startToken];
+    let decodificarSecuenciaInput = [startToken];
     let response = "";
     let stopCondition = false;
 
-    while (!stopCondition && decoderInputSequence.length <= maxOutputLength) {
-      const paddedDecoderInput = padSequences(decoderInputSequence, maxOutputLength);
+    while (!stopCondition && decodificarSecuenciaInput.length <= maxOutputLength) {
+      const paddedDecoderInput = padSequences(decodificarSecuenciaInput, maxOutputLength);
       const decoderInputTensor = tf.tensor2d([paddedDecoderInput], [1, maxOutputLength], "int32");
       const outputTokens = await model.executeAsync([encoderInputTensor, decoderInputTensor]);
 
       const outputTensor = Array.isArray(outputTokens) ? outputTokens[0] : outputTokens;
       const outputIndices = outputTensor.argMax(-1).dataSync();
-      const nextToken = outputIndices[decoderInputSequence.length - 1];
+      const nextToken = outputIndices[decodificarSecuenciaInput.length - 1];
 
       if (nextToken === endToken || response.split(" ").length >= maxOutputLength) {
         stopCondition = true;
       } else {
         response += decodeOutput([nextToken]) + " ";
-        decoderInputSequence.push(nextToken);
+        decodificarSecuenciaInput.push(nextToken);
       }
 
       tf.dispose(outputTokens);
@@ -118,7 +118,7 @@ export const useModelChatBot = () => {
   };
 
   useEffect(() => {
-    loadModel();
+    cargarModelo();
   }, []);
 
   return {
