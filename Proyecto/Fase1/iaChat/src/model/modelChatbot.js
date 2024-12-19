@@ -39,7 +39,9 @@ export async function reconocerInput(userInput) {
 export async function generarRespuesta(userInput) {
     const entrada = await reconocerInput(userInput);
     if (entrada && respuestas[entrada]) {
-        return respuestas[entrada];
+        const posiblesRespuestas = respuestas[entrada];  // Obtener las respuestas posibles para la entrada
+        const respuestaAleatoria = posiblesRespuestas[Math.floor(Math.random() * posiblesRespuestas.length)]; // Seleccionar una respuesta aleatoria
+        return respuestaAleatoria;
     } else {
         return 'Lo siento, no logro comprenderte, ¿Puedes volver a repetirlo?';
     }
