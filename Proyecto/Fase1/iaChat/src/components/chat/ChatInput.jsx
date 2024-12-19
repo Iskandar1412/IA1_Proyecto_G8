@@ -1,9 +1,38 @@
-import React from "react";
+import React, { useState } from "react";
 import { useChatbotContext } from "../../context/ChatboxContext";
 
 export const ChatInput = () => {
   const { sendMessage, setInputValue, inputValue } = useChatbotContext();
-  
+  const [language, setLanguage] = useState("es"); // Estado para idioma seleccionado
+
+  // Preguntas comunes en español e inglés
+  const commonQuestions = {
+    es: [
+      "¿Eres mayor que yo?",
+      "Eres una bebé",
+      "Dime cuál es tu edad",
+      "Di si eres un chiquitín",
+      "Di si eres una pequeña",
+      "¿Cómo me puedes ayudar?",
+      "¿Qué tipo de ayuda puedes ofrecerme?",
+      "¿Qué apoyo puedes darme?",
+      "Dime cómo puedes ayudarme",
+      "¿Cómo puedes ser útil para mí?",
+    ],
+    en: [
+      "Are you older than me?",
+      "You're a baby",
+      "Tell me your age",
+      "Say if you are a little boy",
+      "Say if you're a little girl",
+      "How can you help me?",
+      "What kind of help can you offer me?",
+      "What support can you give me?",
+      "Tell me how you can help me",
+      "How can you be useful to me?",
+    ],
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (inputValue.trim()) {
@@ -17,6 +46,37 @@ export const ChatInput = () => {
       onSubmit={handleSubmit}
       className="flex flex-row items-center h-16 rounded-xl bg-white w-full px-4"
     >
+      {/* Selector de idioma */}
+      <div className="mr-4">
+        <select
+          className="border rounded-lg p-2"
+          value={language}
+          onChange={(e) => setLanguage(e.target.value)}
+        >
+          <option value="es">Español</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+
+      {/* Selector de preguntas comunes */}
+      <div className="mr-4">
+        <select
+          className="border rounded-lg p-2"
+          onChange={(e) => setInputValue(e.target.value)}
+          value=""
+        >
+          <option value="" disabled>
+            Preguntas comunes
+          </option>
+          {commonQuestions[language].map((question, index) => (
+            <option key={index} value={question}>
+              {question}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Campo de texto */}
       <div className="flex-grow ml-4">
         <div className="relative w-full">
           <input
@@ -28,6 +88,8 @@ export const ChatInput = () => {
           />
         </div>
       </div>
+
+      {/* Botón de enviar */}
       <div className="ml-4">
         <button
           type="submit"
