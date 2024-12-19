@@ -2,15 +2,33 @@ import React, { createContext, useContext, useState } from 'react';
 import { useModelChatBot } from '../hooks/useModelChatBot';
 
 const ChatbotContext = createContext();
-
 const initialMessages = [
   {
-    id: 0,
+    id: 4440,
     sender: 'C',
-    text: 'Hola, soy IaChatbot, ¿en qué puedo ayudarte? 🤖',
+    text: 'Hola, soy IaChatbot. Estoy aquí para ayudarte con cualquier pregunta que tengas. 🤖',
+    type: 'received',
+  },
+  {
+    id: 4441,
+    sender: 'C',
+    text: 'Puedes preguntarme cosas como:\n- ¿Eres mayor que yo?\n- ¿Cómo me puedes ayudar?\n- Dime cuál es tu edad.',
+    type: 'received',
+  },
+  {
+    id: 44442,
+    sender: 'C',
+    text: 'También puedo responder preguntas sobre diversos temas o simplemente charlar. ¡Escríbeme algo para empezar!',
+    type: 'received',
+  },
+  {
+    id:4424223,
+    sender: 'C',
+    text: 'Ah, y también sé algo de inglés, aunque sigo aprendiendo. Puedes intentar preguntarme algo en ese idioma. 😊',
     type: 'received',
   },
 ];
+
 
 export const ChatbotProvider = ({ children }) => {
   const {generarRespuesta, isLoading:isLoadingModel} = useModelChatBot();
