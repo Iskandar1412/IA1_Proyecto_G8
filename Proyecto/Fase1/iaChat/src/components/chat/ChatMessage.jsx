@@ -1,7 +1,14 @@
 import React from "react";
 
-export const ChatMessage = ({ sender, text, type, seen }) => {
+export const ChatMessage = ({ sender, text, type, seen, time }) => {
   const isSent = type === "sent";
+
+  // Formato de hora: solo horas y minutos
+  const formatTime = (time) => {
+    const date = time ? new Date(time) : new Date();
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
   return (
     <div
       className={`col-start-${isSent ? "6" : "1"} col-end-${
@@ -24,8 +31,11 @@ export const ChatMessage = ({ sender, text, type, seen }) => {
           }`}
         >
           <div>{text}</div>
+          <div className="absolute text-xs bottom-0 right-0 -mb-5 mr-2 text-gray-500">
+            {formatTime(time)}
+          </div>
           {seen && (
-            <div className="absolute text-xs bottom-0 right-0 -mb-5 mr-2 text-gray-500">
+            <div className="absolute text-xs bottom-0 right-0 -mb-8 mr-2 text-gray-500">
               Seen
             </div>
           )}
