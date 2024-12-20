@@ -44,14 +44,25 @@ max_input_length = 20  # Longitud máxima de las secuencias de entrada
 max_output_length = 20  # Longitud máxima de las secuencias de salida
 
 
-# Leer el archivo TSV con pandas
-file_path = "dataset.tsv"
-data = pd.read_csv(file_path, sep="\t")
+# Leer el archivo TSV en español con pandas
+file_path_es = "dataset_es.tsv"
+data_es = pd.read_csv(file_path_es, sep="\t")
 
-# Extraer columnas "Question" y "Answer"
-input_texts = data["Question"].tolist()
-output_texts = ["<start> " + answer + " <end>" for answer in data["Answer"].tolist()]
+# Leer el archivo TSV en ingles con pandas
+file_path_en = "dataset_en.tsv"
+data_en = pd.read_csv(file_path_en, sep="\t")
 
+# Extraer columnas "Question" y "Answer" del dataset en español
+input_texts_es = data_es["Question"].tolist()
+output_texts_es = ["<start> " + answer_es + " <end>" for answer_es in data_es["Answer"].tolist()]
+
+# Extraer columnas "Question" y "Answer" del dataset en inglés
+input_texts_en = data_en["Question"].tolist()
+output_texts_en = ["<start> " + answer_en + " <end>" for answer_en in data_en["Answer"].tolist()]
+
+# Unificación de dataset en inglés y español
+input_texts = input_texts_es + input_texts_en
+output_texts = output_texts_es + output_texts_en
 # ========================
 # Preprocesamiento de datos
 # ========================
@@ -217,7 +228,6 @@ print("Tokenizadores exportados como input_tokenizer.json y output_tokenizer.jso
 ```
 
 * El propósito principal es crear un chatbot que pueda procesar texto en español, generando respuestas coherentes mediante aprendizaje supervisado. La implementación incluye desde el preprocesamiento de datos hasta la inferencia para interactuar con el usuario.
-
 * Para los componentes principales se cuenta con los siguientes
     * Datos de Entrada y Salida: Estos utilizan las listas de textos para poder simular preguntas y respuestas, en donde las respuestas están marcadas mediante etiquetas para indicar de esta forma el inicio y el fin para cada secuencia.
     * Preprocesamiento: Los textos para esto se convierten en secuencias numéricas tokenizandose, esto se aplicatambien para que todas las secuencias tengan una misma longitud y de esta forma tener una salida la cual se codifica en one-hot encoding para ser compatibles con el modelo..
@@ -233,18 +243,33 @@ print("Tokenizadores exportados como input_tokenizer.json y output_tokenizer.jso
 * Resultados Esperados: Se puede decir que se pueden obtener respuestas simples y coherentes basadas en los datos de entrenamiento proporcionados, en lo que es la capacidad de aprender patrones, si lleva su buena cantidad de preguntas pero poco a poco aprende patrones en lo que es la relación de pregunta-respuesta.
 
 ### DATASET
-Para entrenar el modelo de tensorflow es necesario un dataset, en este proyecto se utilizó un archivo csv con el siguiente formato:
+Dado que ahora es necesario que el chatbot entienda tanto el idioma en inglés como el español, se han implementado 2 datasets para tener un mejor orden, uno por cada idioma, además, se a modificado levemente su estructura con la intención de ser mas intuitivas a la hora de leerlos.
+
+#### EJEMPLIFICACIÓN DEL DATASTE EN ESPAÑOL [[dataset_es.tsv](../../Proyecto/Fase1/modelo/dataset/dataset_es.tsv)]
 ```
-Question	Answer	Source	Metadata
-¿Eres mayor que yo?	En realidad, no tengo edad. Los bots no cumplimos años.	qna_chitchat_Friendly	editorial:chitchat
-Eres una bebé	En realidad, no tengo edad. Los bots no cumplimos años.	qna_chitchat_Friendly	editorial:chitchat
-Dime cuál es tu edad	En realidad, no tengo edad. Los bots no cumplimos años.	qna_chitchat_Friendly	editorial:chitchat
+Question	Answer
+¿Eres mayor que yo?	En realidad, no tengo edad. Los bots no cumplimos años.
+Eres una bebé	En realidad, no tengo edad. Los bots no cumplimos años.
+Dime cuál es tu edad	En realidad, no tengo edad. Los bots no cumplimos años.
 ....
-Me siento súper baldado	He oído que no hay nada como una buena siesta.	qna_chitchat_Friendly	editorial:chitchat
-Me siento súper cansada	He oído que no hay nada como una buena siesta.	qna_chitchat_Friendly	editorial:chitchat
-Me siento súper hastiado	He oído que no hay nada como una buena siesta.	qna_chitchat_Friendly	editorial:chitchat
+Me siento súper baldado	He oído que no hay nada como una buena siesta.
+Me siento súper cansada	He oído que no hay nada como una buena siesta.
+Me siento súper hastiado	He oído que no hay nada como una buena siesta.
 ```
-Este fue modificado en ciertos aspectos, a continuación se encuentra el link hacia el archivo en caso de querer utilizarlo:
+#### EJEMPLIFICACIÓN DEL DATASTE EN INGLES [[dataset_en.tsv](../../Proyecto/Fase1/modelo/dataset/dataset_en.tsv)]
+```
+Question	Answer
+Are you older than me?	Actually, I'm not old. Bots don't have a birthday.
+You're a baby	Actually, I'm not old. Bots don't have a birthday.
+Tell me your age	Actually, I'm not old. Bots don't have a birthday.
+....
+I feel super bald	I've heard there's nothing like a good nap.
+I feel super tired	I've heard there's nothing like a good nap.
+I feel super jaded	I've heard there's nothing like a good nap.
+
+```
+
+Este dataset fue modificado y adaptado tomando como base el siguiente:
 ```
 https://qnamakerstore.blob.core.windows.net/qnamakerdata/editorial/spanish/qna_chitchat_friendly.tsv
 ```
@@ -254,9 +279,6 @@ Dado que el modelo fue entrenado en python, es necesario realizar la exportació
 ```bash
 !tensorflowjs_converter --input_format=tf_saved_model --output_format=tfjs_graph_model --control_flow_v2=true  sample_data/tf_model/ sample_data/tfjs_model2
 ```
-
-
-
 
 ### Uso Del Modelo (useModelChatBot.jsx)
 Este código corresponde a un custom hook de React que se utiliza para interactuar con el modelo de TensorFlow.js para crear un chatbot. A continuación, te explico cada sección del código de manera detallada.
@@ -406,5 +428,5 @@ export const useModelChatBot = () => {
   
 ### LINK DE COLAB DEL MODELO
 ```
-https://colab.research.google.com/drive/1THxV3Qy_JrS1Vrf0ufBHD1JMMlAaA64g?authuser=1#scrollTo=TGpqZgHQIGlJ
+https://colab.research.google.com/drive/1THxV3Qy_JrS1Vrf0ufBHD1JMMlAaA64g?usp=sharing
 ```
