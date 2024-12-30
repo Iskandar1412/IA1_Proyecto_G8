@@ -92,11 +92,13 @@ class ChatApp:
 
 if __name__ == "__main__":
     try:
-        model_path = 'model/sample_data/tf_model'
-        input_tokenizer_path = 'model/input_tokenizer.json'
-        output_tokenizer_path = 'model/output_tokenizer.json'
+        model_path = 'model/chatCodeModel/tf_model'
+        input_tokenizer_path = 'model/chatCodeModel/input_tokenizer.json'
+        output_tokenizer_path = 'model/chatCodeModel/output_tokenizer.json'
 
-        chatbot_model = ChatBotModel(model_path, input_tokenizer_path, output_tokenizer_path)
+        chatbot_model = ChatBotModel(model_path, input_tokenizer_path, output_tokenizer_path, max_output_length=200)
+
+
 
   
         root = tk.Tk()

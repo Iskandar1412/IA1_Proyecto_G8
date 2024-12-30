@@ -117,3 +117,5 @@ class ChatBotModel:
         # Decodificar respuesta
         return self.decode_output(response).replace("<start>", "").replace("<end>", "").strip()
 
+
+
