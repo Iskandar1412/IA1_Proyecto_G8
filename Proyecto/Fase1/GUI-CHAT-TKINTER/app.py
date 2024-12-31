@@ -3,14 +3,17 @@ from tkinter import ttk
 from datetime import datetime
 from model.ChatBotModel import ChatBotModel
 
+
 class ChatApp:
-    def __init__(self, root, chatbot_model):
+    def __init__(self, root, chatbot_model, chatbotcode_model):
         self.root = root
         self.root.title("IA CHAT 🤖")
         self.root.geometry("500x600")
         self.root.configure(bg="#2b2b2b")
         
         self.chatbot_model = chatbot_model
+        self.chatbotcode_model = chatbotcode_model
+        self.use_code_model = tk.BooleanVar(value=False)
    
         self.chat_frame = tk.Frame(self.root, bg="#3c3f41", padx=10, pady=10)
         self.chat_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=(10, 5))
@@ -34,6 +37,14 @@ class ChatApp:
 
         self.send_button = ttk.Button(self.entry_frame, text="Enviar", command=self.send_message)
         self.send_button.pack(side=tk.RIGHT)
+
+        self.check_frame = tk.Frame(self.root, bg='#2b2b2b')
+        self.check_frame.pack(fill=tk.X, padx=10,pady=(0,5))
+
+        self.code_check = ttk.Checkbutton(
+            self.check_frame, text="Usar chat de código", variable=self.use_code_model, style="TCheckbutton"
+        )
+        self.code_check.pack(side=tk.LEFT)
 
         # Styling
         self.style = ttk.Style()
@@ -67,8 +78,9 @@ class ChatApp:
             self.entry_field.delete(0, tk.END)
             
             # Get response from the chatbot model
+            selected_model = self.chatbotcode_model if self.use_code_model.get() else self.chatbot_model
             try:
-                bot_response = self.chatbot_model.chat(user_message)
+                bot_response = selected_model.chat(user_message)
                 if not bot_response:
                     bot_response = "Lo siento, no entiendo. ¿Podrías reformular tu pregunta?"
             except Exception as e:
@@ -92,17 +104,23 @@ class ChatApp:
 
 if __name__ == "__main__":
     try:
-        model_path = 'model/chatCodeModel/tf_model'
-        input_tokenizer_path = 'model/chatCodeModel/input_tokenizer.json'
-        output_tokenizer_path = 'model/chatCodeModel/output_tokenizer.json'
+        
+        chatbot_model = ChatBotModel(
+            'model/chatModel/tf_model', 
+            'model/chatModel/input_tokenizer.json', 
+            'model/chatModel/output_tokenizer.json', 
+            max_output_length=200
+        )
 
-        chatbot_model = ChatBotModel(model_path, input_tokenizer_path, output_tokenizer_path, max_output_length=200)
+        chatbotcode_model = ChatBotModel(
+            'model/chatCodeModel/tf_model', 
+            'model/chatCodeModel/input_tokenizer.json', 
+            'model/chatCodeModel/output_tokenizer.json', 
+            max_output_length=200
+        )
 
-
-
-  
         root = tk.Tk()
-        app = ChatApp(root, chatbot_model)
+        app = ChatApp(root, chatbot_model, chatbotcode_model)
         root.mainloop()
     except Exception as e:
         print(f"Error initializing application: {e}")
