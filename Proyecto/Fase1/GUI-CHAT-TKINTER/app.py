@@ -7,12 +7,47 @@ class ChatApp:
     def __init__(self, root, chatbot_model, chatbotcode_model):
         self.root = root
         self.root.title("IA CHAT")
-        self.root.geometry("500x600")
+        self.root.geometry("500x700")
         self.root.configure(bg="#F5F5F5")
 
         self.chatbot_model = chatbot_model
         self.chatbotcode_model = chatbotcode_model
         self.use_code_model = tk.BooleanVar(value=False)
+
+        # Preguntas comunes
+        self.common_questions = {
+            "es": [
+                "¿Eres mayor que yo?",
+                "Eres una bebé",
+                "Dime cuál es tu edad",
+                "Di si eres un chiquitín",
+                "Di si eres una pequeña",
+                "¿Cómo me puedes ayudar?",
+                "¿Qué tipo de ayuda puedes ofrecerme?",
+                "¿Qué apoyo puedes darme?",
+                "Dime cómo puedes ayudarme",
+                "¿Cómo puedes ser útil para mí?",
+            ],
+            "en": [
+                "Are you older than me?",
+                "You're a baby",
+                "Tell me your age",
+                "Say if you are a little boy",
+                "Say if you're a little girl",
+                "How can you help me?",
+                "What kind of help can you offer me?",
+                "What support can you give me?",
+                "Tell me how you can help me",
+                "How can you be useful to me?",
+            ],
+        }
+        self.selected_language = tk.StringVar(value="es")
+
+        # Model selector
+        self.create_model_selector()
+
+        # Language selector
+        self.create_language_selector()
 
         # Chat frame
         self.chat_frame_container = tk.Frame(self.root, bg="#F5F5F5")
@@ -50,6 +85,9 @@ class ChatApp:
         )
         self.send_button.pack(side=tk.RIGHT, pady=5, ipady=5, ipadx=10)
 
+        # Dropdown para preguntas comunes
+        self.create_question_dropdown()
+
         # Initial messages
         self.initial_messages = [
             {
@@ -64,6 +102,154 @@ class ChatApp:
             }
         ]
         self.load_initial_messages()
+
+    def create_model_selector(self):
+        model_frame = tk.Frame(self.root, bg="#F5F5F5")
+        model_frame.pack(fill=tk.X, padx=10, pady=(10, 5))
+
+        tk.Label(
+            model_frame,
+            text="Selecciona el modelo:",
+            bg="#F5F5F5",
+            font=("Helvetica", 12),
+        ).pack(side=tk.LEFT, padx=(0, 10))
+
+        self.selected_model = tk.StringVar(value="chatbot")
+        self.model_dropdown = ttk.Combobox(
+            model_frame,
+            textvariable=self.selected_model,
+            values=["chatbot", "chatcode"],
+            state="readonly",
+            font=("Helvetica", 12),
+        )
+        self.model_dropdown.pack(side=tk.LEFT)
+        self.model_dropdown.bind("<<ComboboxSelected>>", self.update_selected_model)
+
+    def update_selected_model(self, event=None):
+        if self.selected_model.get() == "chatcode":
+            self.use_code_model.set(True)
+        else:
+            self.use_code_model.set(False)
+        self.update_question_dropdown()  # Actualizar las preguntas según el modelo seleccionado
+
+    def create_language_selector(self):
+        language_frame = tk.Frame(self.root, bg="#F5F5F5")
+        language_frame.pack(fill=tk.X, padx=10, pady=(10, 5))
+
+        tk.Label(
+            language_frame,
+            text="Selecciona un idioma:",
+            bg="#F5F5F5",
+            font=("Helvetica", 12),
+        ).pack(side=tk.LEFT, padx=(0, 10))
+
+        self.language_dropdown = ttk.Combobox(
+            language_frame,
+            textvariable=self.selected_language,
+            values=["es", "en"],
+            state="readonly",
+            font=("Helvetica", 12),
+        )
+        self.language_dropdown.pack(side=tk.LEFT)
+        self.language_dropdown.bind("<<ComboboxSelected>>", self.update_question_dropdown)
+
+    def create_question_dropdown(self):
+        question_frame = tk.Frame(self.root, bg="#F5F5F5")
+        question_frame.pack(fill=tk.X, padx=10, pady=(5, 10))
+
+        tk.Label(
+            question_frame,
+            text="Preguntas comunes:",
+            bg="#F5F5F5",
+            font=("Helvetica", 12, "bold"),
+        ).pack(anchor="w", pady=(0, 5))
+
+        self.dropdown_var = tk.StringVar(value="Selecciona una pregunta")
+        self.question_dropdown = ttk.Combobox(
+            question_frame,
+            textvariable=self.dropdown_var,
+            state="readonly",
+            font=("Helvetica", 10),
+        )
+        self.question_dropdown.pack(fill=tk.X)
+        self.question_dropdown.bind("<<ComboboxSelected>>", self.insert_dropdown_question)
+
+        self.update_question_dropdown()
+
+    def update_question_dropdown(self, event=None):
+        language = self.selected_language.get()
+        if self.selected_model.get() == "chatcode":
+            # Preguntas específicas para `chatcode` (Python y JavaScript)
+            questions = {
+                "es": [
+                    # Python
+                    "¿Cómo imprimo en pantalla con Python?",
+                    "Genera el código para declarar variables de tipo entero en Python.",
+                    "Genera el código para declarar constantes de tipo entero en Python.",
+                    "Dame el código para generar un array unidimensional de cadenas en Python.",
+                    "Dame el código para generar un array bidimensional de cadenas en Python.",
+                    "¿Cómo puedo escribir un bucle Do en Python?",
+                    "Crea una declaración if usando mayor que en Python.",
+                    "Dame un ejemplo de if else if else en Python.",
+                    "Dame un ejemplo de switch en Python.",
+                    "¿Cómo implementas una función en Python?",
+                    "¿Puedes proporcionar el algoritmo de Bubble Sort en Python?",
+                    "Extrae los ifs del algoritmo de Bubble Sort.",
+                    # JavaScript
+                    "¿Cómo imprimo en consola con JavaScript?",
+                    "Genera el código para declarar variables de tipo entero en JavaScript.",
+                    "Genera el código para declarar constantes de tipo entero en JavaScript.",
+                    "Dame el código para generar un array unidimensional de cadenas en JavaScript.",
+                    "Dame el código para generar un array bidimensional de cadenas en JavaScript.",
+                    "¿Cómo puedo escribir un bucle Do en JavaScript?",
+                    "Crea una declaración if usando mayor que en JavaScript.",
+                    "Dame un ejemplo de if else if else en JavaScript.",
+                    "Dame un ejemplo de switch en JavaScript.",
+                    "¿Cómo implementas una función en JavaScript?",
+                    "¿Puedes proporcionar el algoritmo de Bubble Sort en JavaScript?",
+                    "Extrae los ifs del algoritmo de Bubble Sort en JavaScript.",
+                ],
+                "en": [
+                    # Python
+                    "How do I print on screen with Python?",
+                    "Generate the code to declare variables of type integer in Python.",
+                    "Generate the code to declare constants of type integer in Python.",
+                    "Give me the code to generate a one-dimensional array of strings in Python.",
+                    "Give me the code to generate a two-dimensional array of strings in Python.",
+                    "How can I write a Do loop in Python?",
+                    "Create the if statement using greater than in Python.",
+                    "Give me an example of if else if else in Python.",
+                    "Give me an example of switch in Python.",
+                    "How do you implement a function in Python?",
+                    "Can you provide the Bubble Sort algorithm in Python?",
+                    "Extract the ifs of the Bubble Sort algorithm.",
+                    # JavaScript
+                    "How do I print to the console in JavaScript?",
+                    "Generate the code to declare variables of type integer in JavaScript.",
+                    "Generate the code to declare constants of type integer in JavaScript.",
+                    "Give me the code to generate a one-dimensional array of strings in JavaScript.",
+                    "Give me the code to generate a two-dimensional array of strings in JavaScript.",
+                    "How can I write a Do loop in JavaScript?",
+                    "Create the if statement using greater than in JavaScript.",
+                    "Give me an example of if else if else in JavaScript.",
+                    "Give me an example of switch in JavaScript.",
+                    "How do you implement a function in JavaScript?",
+                    "Can you provide the Bubble Sort algorithm in JavaScript?",
+                    "Extract the ifs of the Bubble Sort algorithm in JavaScript.",
+                ],
+            }.get(language, [])
+        else:
+            # Preguntas generales para `chatbot`
+            questions = self.common_questions.get(language, [])
+
+        self.question_dropdown["values"] = questions
+        self.question_dropdown.set("Selecciona una pregunta")
+
+    def insert_dropdown_question(self, event=None):
+        selected_question = self.dropdown_var.get()
+        if selected_question and selected_question != "Selecciona una pregunta":
+            self.entry_field.delete(0, tk.END)
+            self.entry_field.insert(0, selected_question)
 
     def load_initial_messages(self):
         for message in self.initial_messages:
@@ -93,13 +279,13 @@ class ChatApp:
 
     def display_message(self, sender, message, align="left"):
         frame = tk.Frame(self.messages_frame, bg="#F5F5F5")
-        frame.pack(fill=tk.X, pady=5, padx=(10 if align == "left" else 50, 10 if align == "right" else 50), anchor="w" if align == "left" else "e")
+        frame.pack(fill=tk.X, pady=8, padx=(10 if align == "left" else 50, 10 if align == "right" else 50), anchor="w" if align == "left" else "e")
 
         bg_color = "#4CAF50" if align == "right" else "#E8E8E8"
         fg_color = "#FFF" if align == "right" else "#333"
 
         message_frame = tk.Frame(frame, bg=bg_color)
-        message_frame.pack(fill=tk.X, side=tk.LEFT, padx=5)
+        message_frame.pack(fill=tk.NONE, side=tk.LEFT if align == "left" else tk.RIGHT, padx=5)
 
         label = tk.Label(
             message_frame,
@@ -112,7 +298,7 @@ class ChatApp:
             padx=10,
             pady=5
         )
-        label.pack(fill=tk.X, anchor="w" if align == "left" else "e")
+        label.pack(fill=tk.X)
 
         if align == "left":
             copy_button = tk.Button(
@@ -133,11 +319,11 @@ class ChatApp:
             bg="#F5F5F5",
             fg="#888",
             font=("Helvetica", 8),
-            anchor="w" if align == "left" else "e"
+            anchor="e" if align == "right" else "w"
         )
         time_label.pack(anchor="w" if align == "left" else "e")
 
-        self.chat_frame.update_idletasks()
+        self.root.after(100, lambda: self.chat_frame.yview_moveto(1.0))
 
 if __name__ == "__main__":
     try:
