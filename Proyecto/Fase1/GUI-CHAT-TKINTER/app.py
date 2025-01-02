@@ -3,65 +3,63 @@ from tkinter import ttk
 from datetime import datetime
 from model.ChatBotModel import ChatBotModel
 
-
 class ChatApp:
     def __init__(self, root, chatbot_model, chatbotcode_model):
         self.root = root
-        self.root.title("IA CHAT 🤖")
+        self.root.title("IA CHAT")
         self.root.geometry("500x600")
-        self.root.configure(bg="#2b2b2b")
-        
+        self.root.configure(bg="#F5F5F5")
+
         self.chatbot_model = chatbot_model
         self.chatbotcode_model = chatbotcode_model
         self.use_code_model = tk.BooleanVar(value=False)
-   
-        self.chat_frame = tk.Frame(self.root, bg="#3c3f41", padx=10, pady=10)
-        self.chat_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=(10, 5))
 
-        self.text_widget = tk.Text(self.chat_frame, wrap=tk.WORD, state=tk.DISABLED,
-                                   bg="#2b2b2b", fg="#ffffff", font=("Helvetica", 12),
-                                   relief=tk.FLAT, highlightthickness=0, padx=10, pady=10, spacing1=2)
-        self.text_widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        # Chat frame
+        self.chat_frame_container = tk.Frame(self.root, bg="#F5F5F5")
+        self.chat_frame_container.pack(fill=tk.BOTH, expand=True, padx=10, pady=(10, 5))
 
-        self.scrollbar = ttk.Scrollbar(self.chat_frame, command=self.text_widget.yview)
+        self.chat_frame = tk.Canvas(self.chat_frame_container, bg="#F5F5F5", highlightthickness=0)
+        self.chat_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        self.scrollbar = ttk.Scrollbar(self.chat_frame_container, orient="vertical", command=self.chat_frame.yview)
         self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        self.text_widget["yscrollcommand"] = self.scrollbar.set
+        self.chat_frame.configure(yscrollcommand=self.scrollbar.set)
+
+        self.messages_frame = tk.Frame(self.chat_frame, bg="#F5F5F5")
+        self.chat_frame.create_window((0, 0), window=self.messages_frame, anchor="nw")
+
+        self.messages_frame.bind("<Configure>", lambda e: self.chat_frame.configure(scrollregion=self.chat_frame.bbox("all")))
 
         # Entry area
-        self.entry_frame = tk.Frame(self.root, bg="#2b2b2b")
+        self.entry_frame = tk.Frame(self.root, bg="#F5F5F5")
         self.entry_frame.pack(fill=tk.X, padx=10, pady=(5, 10))
 
-        self.entry_field = ttk.Entry(self.entry_frame, font=("Helvetica", 12))
-        self.entry_field.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 10))
+        self.entry_field = tk.Entry(self.entry_frame, font=("Helvetica", 12), bd=0, relief=tk.FLAT, bg="#E8E8E8", fg="#333")
+        self.entry_field.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 10), pady=5, ipady=5)
         self.entry_field.bind("<Return>", self.send_message)
 
-        self.send_button = ttk.Button(self.entry_frame, text="Enviar", command=self.send_message)
-        self.send_button.pack(side=tk.RIGHT)
-
-        self.check_frame = tk.Frame(self.root, bg='#2b2b2b')
-        self.check_frame.pack(fill=tk.X, padx=10,pady=(0,5))
-
-        self.code_check = ttk.Checkbutton(
-            self.check_frame, text="Usar chat de código", variable=self.use_code_model, style="TCheckbutton"
+        self.send_button = tk.Button(
+            self.entry_frame,
+            text="Enviar",
+            font=("Helvetica", 12),
+            bg="#4CAF50",
+            fg="#FFF",
+            bd=0,
+            relief=tk.FLAT,
+            command=self.send_message
         )
-        self.code_check.pack(side=tk.LEFT)
+        self.send_button.pack(side=tk.RIGHT, pady=5, ipady=5, ipadx=10)
 
-        # Styling
-        self.style = ttk.Style()
-        self.style.theme_use("clam")
-        self.style.configure("TButton", font=("Helvetica", 12), background="#4CAF50", foreground="#ffffff")
-        self.style.map("TButton", background=[("active", "#45a049")])
-
-        # Load initial messages
+        # Initial messages
         self.initial_messages = [
             {
-                "sender": "Chat-Ia 🤖",
-                "text": "Hola, soy IaChatbot. Estoy aquí para ayudarte con cualquier pregunta que tengas. 🤖",
+                "sender": "Chat-Ia",
+                "text": "Hola, soy IaChatbot. Estoy aquí para ayudarte con cualquier pregunta que tengas.",
                 "type": "received",
             },
             {
-                "sender": "Chat-Ia 🤖",
-                "text": "He sido entrenado para responder en español e inglés. ¡Prueba a preguntarme algo! 😊",
+                "sender": "Chat-Ia",
+                "text": "He sido entrenado para responder en español e inglés. ¡Prueba a preguntarme algo!",
                 "type": "received",
             }
         ]
@@ -76,8 +74,7 @@ class ChatApp:
         if user_message:
             self.display_message("You", user_message, align="right")
             self.entry_field.delete(0, tk.END)
-            
-            # Get response from the chatbot model
+
             selected_model = self.chatbotcode_model if self.use_code_model.get() else self.chatbot_model
             try:
                 bot_response = selected_model.chat(user_message)
@@ -86,25 +83,64 @@ class ChatApp:
             except Exception as e:
                 print(f"Error getting response: {e}")
                 bot_response = "Lo siento, ha ocurrido un error. Por favor, inténtalo de nuevo."
-            
-            self.display_message("Chat-Ia 🤖", bot_response)
+
+            self.display_message("Chat-Ia", bot_response, align="left")
+
+    def copy_to_clipboard(self, text):
+        self.root.clipboard_clear()
+        self.root.clipboard_append(text)
+        self.root.update()
 
     def display_message(self, sender, message, align="left"):
-        timestamp = datetime.now().strftime("%H:%M")
-        self.text_widget.config(state=tk.NORMAL)
-        if align == "right":
-            self.text_widget.tag_configure("user", justify="right", foreground="#4CAF50")
-            self.text_widget.insert(tk.END, f"{timestamp} {sender}: {message}\n", "user")
-        else:
-            self.text_widget.tag_configure("bot", justify="left", foreground="#ffffff")
-            self.text_widget.insert(tk.END, f"{sender}: {message} {timestamp}\n", "bot")
-        self.text_widget.config(state=tk.DISABLED)
-        self.text_widget.see(tk.END)
+        frame = tk.Frame(self.messages_frame, bg="#F5F5F5")
+        frame.pack(fill=tk.X, pady=5, padx=(10 if align == "left" else 50, 10 if align == "right" else 50), anchor="w" if align == "left" else "e")
 
+        bg_color = "#4CAF50" if align == "right" else "#E8E8E8"
+        fg_color = "#FFF" if align == "right" else "#333"
+
+        message_frame = tk.Frame(frame, bg=bg_color)
+        message_frame.pack(fill=tk.X, side=tk.LEFT, padx=5)
+
+        label = tk.Label(
+            message_frame,
+            text=message,
+            bg=bg_color,
+            fg=fg_color,
+            wraplength=350,
+            justify="left" if align == "left" else "right",
+            font=("Helvetica", 12),
+            padx=10,
+            pady=5
+        )
+        label.pack(fill=tk.X, anchor="w" if align == "left" else "e")
+
+        if align == "left":
+            copy_button = tk.Button(
+                message_frame,
+                text="Copiar",
+                font=("Helvetica", 8),
+                bg="#D3D3D3",
+                fg="#000",
+                bd=0,
+                command=lambda: self.copy_to_clipboard(message)
+            )
+            copy_button.pack(side=tk.RIGHT, padx=5, pady=5)
+
+        timestamp = datetime.now().strftime("%H:%M")
+        time_label = tk.Label(
+            frame,
+            text=timestamp,
+            bg="#F5F5F5",
+            fg="#888",
+            font=("Helvetica", 8),
+            anchor="w" if align == "left" else "e"
+        )
+        time_label.pack(anchor="w" if align == "left" else "e")
+
+        self.chat_frame.update_idletasks()
 
 if __name__ == "__main__":
     try:
-        
         chatbot_model = ChatBotModel(
             'model/chatModel/tf_model', 
             'model/chatModel/input_tokenizer.json', 

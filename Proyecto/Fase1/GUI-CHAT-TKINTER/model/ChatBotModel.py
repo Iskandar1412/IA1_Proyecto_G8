@@ -115,7 +115,4 @@ class ChatBotModel:
                 decoder_input.append(next_token)
 
         # Decodificar respuesta
-        return self.decode_output(response).replace("<start>", "").replace("<end>", "").strip()
-
-
-
+        return self.decode_output(response).replace("<start>", "").replace("<end>", "").replace("\\n","\n").replace("\\t","\t").strip()
