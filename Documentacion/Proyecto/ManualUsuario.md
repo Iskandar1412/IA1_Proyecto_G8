@@ -23,10 +23,12 @@ La aplicación de escritorio a parte de aceptar lo que es el idioma español e i
 - **3:** Se le implemento la funcionalidad de dar algoritmos tanto en lenguaje de Python como en Javascript
 
 -  **4:** El chatbot es capaz de hablar en inglés, por lo cuál esta sección permite cambiar el idioma de las *"Preguntas comunes"*, para preguntas tanto de código como llas normales, dependiendo del modelo que se seleccione y el lenguaje (para tener los listados de preguntas que se le pueden hacer).
+
 ![alt text](./IMG/IMG2.png)
 
 - **5:** Con la intención de guiar al usuario el chatbot  indica de manera explícita posibles preguntas a realizar o temas que tratar.
 
 ## Ejemplificación del Funcionamiento
 La aplicación en si para preguntas comunes o de código en cualquier idioma tiene lo que es la seleción de idioma para hacer las sugerencias del modelo seleccionado.
+
 ![alt text](./IMG/IMG2.png)
