@@ -514,10 +514,11 @@ https://qnamakerstore.blob.core.windows.net/qnamakerdata/editorial/spanish/qna_c
 ```
 
 #### EJEMPLIFICACIÓN DEL DATASET PARA CÓDIGO [[dataset.tsv](../../Proyecto/Fase1/modelo/datasets_coding/massive_dataset_es.tsv)]
-
+```
 Question	Answer
 ¿Me puedes dar el metodo bubble sort?	<<Generación del código de bubble sort>>
 ¿Me puedes dar el metodo quick sort?	<<Generación del código de bubble sort>>
+```
 
 
 ### Código Aplicación Tkinter
