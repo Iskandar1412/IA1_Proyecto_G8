@@ -9,3 +9,10 @@ instalacion de paquetes
 pip install -r requirements.txt
 
 Descargar modelos y colocarlos en su respectiva carepta dentro de la caperta model
+
+Comandos hacer el ejecutable
+
+pip install pyinstaller
+pyinstaller app.py
+pyinstaller -F app.py
+.\dist\app.exe
