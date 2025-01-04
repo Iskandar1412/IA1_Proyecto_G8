@@ -1000,3 +1000,8 @@ class ChatBotModel:
 ```
 
 Aqui está otra clase `ChatBotModel`, la cual se encarga de importar los modelos para el chat (a parte de app.py) y se encarga de obtener las respuestas de los modelos que se utilicen.
+
+
+#### Drive del Ejecutable
+
+https://drive.google.com/drive/folders/1_kkn68LLyy4vaOoJlvWr37aF4-hiQGEM?usp=sharing
